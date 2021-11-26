@@ -70,6 +70,29 @@ fn serve() -> Result<()> {
         info!("serving Electrum RPC on {}", listener.local_addr()?);
         spawn("accept_loop", || accept_loop(listener, server_tx)); // detach accepting thread
     };
+    // use std::env;
+    // println!("MAGIC SIGNET2! {:?}", env::var("SIGNET_MAGIC").unwrap());
+    
+    use bitcoin::network::constants::Network;
+    
+    // std::env::set_var("SIGNET_MAGIC", 0xA05DE48D);
+    // std::env::remove_var("SIGNET_MAGIC");
+    assert_eq!(Some(Network::Bitcoin), Network::from_magic(0xD9B4BEF9));
+    assert_eq!(Some(Network::Testnet), Network::from_magic(0x0709110B));
+    assert_eq!(Some(Network::Signet), Network::from_magic(0x40CF030A));
+    assert_eq!(Some(Network::Regtest), Network::from_magic(0xDAB5BFFA));
+    // with var en with on $HOME/.bashrc
+    assert_eq!(Some(Network::CSignet), Network::from_magic(0xA05DE48D));
+    // with no var env
+    // assert_eq!(None, Network::from_magic(0xA05DE48D));
+    assert_eq!(None, Network::from_magic(0xFFFFFFFF));
+    
+    assert_eq!(Network::Bitcoin.magic(), 0xD9B4BEF9);
+    assert_eq!(Network::Testnet.magic(), 0x0709110B);
+    assert_eq!(Network::Signet.magic(), 0x40CF030A);
+    assert_eq!(Network::Regtest.magic(), 0xDAB5BFFA);
+    assert_eq!(Network::CSignet.magic(), 0xA05DE48D);
+    // assert_eq!(Network::CSignet.magic(), 0x40CF030A);
 
     let server_batch_size = metrics.histogram_vec(
         "server_batch_size",
